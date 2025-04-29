@@ -19,7 +19,7 @@ general:
 functions:
   pdf_file_ingest_tool:
     _type: pdf_file_ingest_tool
-    ingest_glob: "examples/documentation_guides/workflows/text_file_ingest/data/*.txt"
+    ingest_glob: "sp8/sp8_workflow_generator/data/*.pdf"
     description: "Search for information about DOCA and GPUNetIO. For any questions about DOCA and GPUNetIO, you must use this tool!"
     embedder_name: nv-embedqa-e5-v5
     chunk_size: 512
@@ -32,6 +32,11 @@ llms:
     model_name: meta/llama-4-maverick-17b-128e-instruct
     temperature: 0.0
     max_tokens: 1024
+
+embedders:
+  nv-embedqa-e5-v5:
+    _type: nim
+    model_name: nvidia/nv-embedqa-e5-v5
 
 workflow:
   _type: react_agent
