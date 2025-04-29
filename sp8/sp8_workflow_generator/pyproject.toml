@@ -1,0 +1,25 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools==69", "setuptools-scm==8"]
+
+[tool.setuptools_scm]
+root = "../.."
+
+[project]
+name = "sp8_workflow_generator"
+dynamic = ["version"]
+dependencies = [
+  "aiqtoolkit[langchain]",
+  "bs4==0.0.2",
+  "faiss-cpu==1.9.0",
+]
+requires-python = ">=3.11"
+description = "generate workflow from knowledge"
+keywords = ["ai", "rag", "agents"]
+classifiers = ["Programming Language :: Python"]
+
+[tool.uv.sources]
+aiqtoolkit = { path = "../../", editable = true }
+
+[project.entry-points.'aiq.components']
+aiq_simple_calculator = "sp8_workflow_generator.register"

@@ -517,7 +517,7 @@ requires-dist = [
     { name = "pkginfo", specifier = "~=1.12" },
     { name = "platformdirs", specifier = "~=4.3" },
     { name = "prefixspan", marker = "extra == 'profiling'", specifier = "~=0.5.2" },
-    { name = "pydantic", specifier = "~=2.10" },
+    { name = "pydantic", specifier = "==2.10.*" },
     { name = "pymilvus", specifier = "~=2.4" },
     { name = "pyyaml", specifier = "~=6.0" },
     { name = "ragas", specifier = "~=0.2.14" },
