@@ -12,6 +12,7 @@ dependencies = [
   "aiqtoolkit[langchain]",
   "bs4==0.0.2",
   "faiss-cpu==1.9.0",
+  "pypdf==5.4.0",
 ]
 requires-python = ">=3.11"
 description = "generate workflow from knowledge"

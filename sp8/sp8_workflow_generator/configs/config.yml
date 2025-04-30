@@ -25,6 +25,14 @@ functions:
     chunk_size: 512
   compliance_checker_tool:
     _type: compliance_checker_tool
+  workflow_critical_tool:
+    _type: workflow_critical_tool
+    llm_name: nim_llm
+    description: "This tool is critical for the workflow."
+  workflow_proposal_tool:
+    _type: workflow_proposal_tool
+    llm_name: nim_llm
+    description: "This tool is used to propose workflows."
 
 llms:
   nim_llm:
@@ -43,6 +51,8 @@ workflow:
   tool_names:
     - compliance_checker_tool
     - pdf_file_ingest_tool
+    - workflow_critical_tool
+    - workflow_proposal_tool
   llm_name: nim_llm
   verbose: true
   retry_parsing_errors: true
