@@ -33,10 +33,13 @@ class WorkflowProposalConfig(FunctionBaseConfig, name="workflow_proposal_tool"):
     """
     Configuration for the workflow proposal tool.
     """
+
     llm_name: LLMRef = Field(description="LLM to use for generating workflows.")
 
 
-@register_function(config_type=WorkflowProposalConfig, framework_wrappers=[LLMFrameworkEnum.LANGCHAIN])
+@register_function(
+    config_type=WorkflowProposalConfig, framework_wrappers=[LLMFrameworkEnum.LANGCHAIN]
+)
 async def workflow_proposal(config: WorkflowProposalConfig, builder: Builder):
     """
     Propose a step-by-step workflow based on provided text requirements.
@@ -49,9 +52,38 @@ async def workflow_proposal(config: WorkflowProposalConfig, builder: Builder):
 
     async def _inner(text: str) -> str:
         prompt = (
-            f"Given the following requirements/text:\n{text}\n\n"
-            "Propose a clear, step-by-step workflow to achieve the objectives described above."
+            "Below is the Technical Specification (v1.0) for the AI Agent Analysis component,\n"
+            "along with any regulation and compliance documents provided.  \n\n"
+            "### Technical Specification\n"
+            "Component: AI Agent Analysis – Documents to Workflow Graph\n"
+            "Date: 2025-04-07\n"
+            "…[insert the full spec here]…\n\n"
+            "### Regulatory & Compliance Documents\n"
+            "…[insert or reference your compliance texts here]…\n\n"
+            "Using **both** the technical spec and the compliance docs, identify every operational step\n"
+            "required to meet the stated goal, highlight which steps present an opportunity for **robot**\n"
+            "automation or **human-robot collaboration**, and estimate duration ranges (in hours) for\n"
+            "each (human_duration and/or robot_duration).  \n\n"
+            "**Output only** the JSON object with two keys—`steps` and `graph`—in **exactly** this format:\n"
+            "```json\n"
+            "{\n"
+            '  "steps": [\n'
+            "    {\n"
+            '      "id": "1",\n'
+            '      "name": "Pre-check",\n'
+            '      "resource": "human",\n'
+            '      "human_duration": [1, 2]\n'
+            "    },\n"
+            "    …\n"
+            "  ],\n"
+            '  "graph": [\n'
+            '    { "from": "1", "to": "2" },\n'
+            "    …\n"
+            "  ]\n"
+            "}\n"
+            "```"
         )
+
         response = await llm.ainvoke(prompt)
         return response.content
 

@@ -33,10 +33,15 @@ class WorkflowCriticalConfig(FunctionBaseConfig, name="workflow_critical_tool"):
     """
     Configuration for the workflow critical evaluation tool.
     """
-    llm_name: LLMRef = Field(description="LLM to use for critical analysis and compliance checking.")
+
+    llm_name: LLMRef = Field(
+        description="LLM to use for critical analysis and compliance checking."
+    )
 
 
-@register_function(config_type=WorkflowCriticalConfig, framework_wrappers=[LLMFrameworkEnum.LANGCHAIN])
+@register_function(
+    config_type=WorkflowCriticalConfig, framework_wrappers=[LLMFrameworkEnum.LANGCHAIN]
+)
 async def workflow_critical(config: WorkflowCriticalConfig, builder: Builder):
     """
     Critically evaluate a proposed workflow against regulatory and compliance requirements.
@@ -49,14 +54,34 @@ async def workflow_critical(config: WorkflowCriticalConfig, builder: Builder):
 
     async def _inner(text: str, proposed_workflow: str) -> str:
         prompt = (
-            f"Text to analyze for regulations/compliance:\n{text}\n\n"
-            f"Proposed Workflow:\n{proposed_workflow}\n\n"
-            "Identify any regulatory or compliance requirements present in the text, "
-            "critique the proposed workflow for compliance, and suggest improvements "
-            "to ensure it adheres to all regulations."
+            f"From the following text, **only** extract the regulatory and compliance policies:\n"
+            f"{text}\n\n"
+            f"Proposed Workflow JSON to critique:\n{proposed_workflow}\n\n"
+            "Using **only** those extracted policies, do the following:\n"
+            "1. Identify any steps in the workflow that violate or omit required regulations.\n"
+            "2. Suggest concrete modifications or additional steps to bring the workflow into full compliance.\n\n"
+            "**Output only** the **revised** workflow as a JSON object in **exactly** this format (no extra prose):\n"
+            "```json\n"
+            "{\n"
+            '  "steps": [\n'
+            "    {\n"
+            '      "id": "1",\n'
+            '      "name": "…",\n'
+            '      "resource": "…",\n'
+            "      // include human_duration and/or robot_duration as needed\n"
+            "    }\n"
+            "    …\n"
+            "  ],\n"
+            '  "graph": [\n'
+            '    { "from": "1", "to": "2" }\n'
+            "    …\n"
+            "  ]\n"
+            "}\n"
+            "```"
         )
+
         response = await llm.ainvoke(prompt)
-        return response.content
+        return {"final_workflow": [response.content]}
 
     yield FunctionInfo.from_fn(
         _inner,
