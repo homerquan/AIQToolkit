@@ -27,11 +27,11 @@ functions:
     _type: compliance_checker_tool
   workflow_critical_tool:
     _type: workflow_critical_tool
-    llm_namee: nim_llm
+    llm_name: nim_llm
     description: "This tool is critical for the workflow."
   workflow_proposal_tool:
     _type: workflow_proposal_tool
-    llm_namee: nim_llm
+    llm_name: nim_llm
     description: "This tool is used to propose workflows."
 
 llms:

@@ -13,6 +13,8 @@ dependencies = [
   "bs4==0.0.2",
   "faiss-cpu==1.9.0",
   "pypdf==5.4.0",
+  "agno==1.4.3",
+  "litellm==1.67.5",
 ]
 requires-python = ">=3.11"
 description = "generate workflow from knowledge"
@@ -23,4 +25,4 @@ classifiers = ["Programming Language :: Python"]
 aiqtoolkit = { path = "../../", editable = true }
 
 [project.entry-points.'aiq.components']
-aiq_simple_calculator = "sp8_workflow_generator.register"
+sp8_workflow_generator = "sp8_workflow_generator.register"

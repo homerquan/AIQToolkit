@@ -23,6 +23,8 @@ from aiq.builder.function_info import FunctionInfo
 from aiq.data_models.component_ref import LLMRef
 from aiq.builder.framework_enum import LLMFrameworkEnum
 
+from .workflow_schema import WorkflowOutput  # your Pydantic model
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +54,10 @@ async def workflow_critical(config: WorkflowCriticalConfig, builder: Builder):
         wrapper_type=LLMFrameworkEnum.LANGCHAIN,
     )
 
-    async def _inner(text: str, proposed_workflow: str) -> str:
+    async def _inner(text: str, proposed_workflow: str) -> WorkflowOutput:
+        logger.info(f"Text value: {text}") # need more retrival
+        logger.info(f"Proposed workflow: {proposed_workflow}")
+        
         prompt = (
             f"From the following text, **only** extract the regulatory and compliance policies:\n"
             f"{text}\n\n"
@@ -79,9 +84,15 @@ async def workflow_critical(config: WorkflowCriticalConfig, builder: Builder):
             "}\n"
             "```"
         )
+        
+        # Enable structured output
+        llm_structured = llm.with_structured_output(WorkflowOutput)
+        # 4. Build the chain
+        chain = prompt | llm_structured
 
-        response = await llm.ainvoke(prompt)
-        return {"final_workflow": [response.content]}
+        output = await chain.ainvoke()
+        logger.info("Final workflow: %s", output.json())
+        return output
 
     yield FunctionInfo.from_fn(
         _inner,

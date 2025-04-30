@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,80 +14,83 @@
 # limitations under the License.
 
 import logging
-from pydantic import Field
-
 from aiq.builder.builder import Builder
 from aiq.cli.register_workflow import register_function
-from aiq.data_models.function import FunctionBaseConfig
-from aiq.builder.function_info import FunctionInfo
 from aiq.data_models.component_ref import LLMRef
+from aiq.data_models.function import FunctionBaseConfig
 from aiq.builder.framework_enum import LLMFrameworkEnum
+from aiq.builder.function_info import FunctionInfo
+from langchain_core.prompts import PromptTemplate
+from .workflow_schema import WorkflowOutput  # your Pydantic model
 
 logger = logging.getLogger(__name__)
 
 
-# -----------------------------
-# File: workflow_proposal_tool.py
-# -----------------------------
 class WorkflowProposalConfig(FunctionBaseConfig, name="workflow_proposal_tool"):
     """
     Configuration for the workflow proposal tool.
     """
-
-    llm_name: LLMRef = Field(description="LLM to use for generating workflows.")
+    llm_name: LLMRef
 
 
 @register_function(
-    config_type=WorkflowProposalConfig, framework_wrappers=[LLMFrameworkEnum.LANGCHAIN]
+    config_type=WorkflowProposalConfig,
+    framework_wrappers=[LLMFrameworkEnum.LANGCHAIN],
 )
 async def workflow_proposal(config: WorkflowProposalConfig, builder: Builder):
     """
-    Propose a step-by-step workflow based on provided text requirements.
+    Propose a step-by-step workflow based on provided text requirements,
+    returning a structured WorkflowOutput object.
     """
-    # Load the specified LLM
+
+    # 1. Load LLM
     llm = await builder.get_llm(
         llm_name=config.llm_name,
         wrapper_type=LLMFrameworkEnum.LANGCHAIN,
     )
 
-    async def _inner(text: str) -> str:
-        prompt = (
-            "Below is the Technical Specification (v1.0) for the AI Agent Analysis component,\n"
-            "along with any regulation and compliance documents provided.  \n\n"
-            "### Technical Specification\n"
-            "Component: AI Agent Analysis – Documents to Workflow Graph\n"
-            "Date: 2025-04-07\n"
-            "…[insert the full spec here]…\n\n"
-            "### Regulatory & Compliance Documents\n"
-            "…[insert or reference your compliance texts here]…\n\n"
-            "Using **both** the technical spec and the compliance docs, identify every operational step\n"
-            "required to meet the stated goal, highlight which steps present an opportunity for **robot**\n"
-            "automation or **human-robot collaboration**, and estimate duration ranges (in hours) for\n"
-            "each (human_duration and/or robot_duration).  \n\n"
-            "**Output only** the JSON object with two keys—`steps` and `graph`—in **exactly** this format:\n"
-            "```json\n"
-            "{\n"
-            '  "steps": [\n'
-            "    {\n"
-            '      "id": "1",\n'
-            '      "name": "Pre-check",\n'
-            '      "resource": "human",\n'
-            '      "human_duration": [1, 2]\n'
-            "    },\n"
-            "    …\n"
-            "  ],\n"
-            '  "graph": [\n'
-            '    { "from": "1", "to": "2" },\n'
-            "    …\n"
-            "  ]\n"
-            "}\n"
-            "```"
-        )
+    # 2. Define prompt template
+    prompt_template = """Below is the Technical Specification (v1.0) and any regulatory/compliance docs:
 
-        response = await llm.ainvoke(prompt)
-        return response.content
+### Technical Specification
+{text}
 
+### Output Format
+Produce a JSON object with keys "steps" and "graph", exactly matching the WorkflowOutput schema.
+Each step must include:
+- id (string)
+- name (string)
+- resource ("human"|"robot"|"both")
+- human_duration (list of two floats) and/or robot_duration (list of two floats)
+
+Each graph edge must include "from" and "to" step IDs.
+
+Return only the JSON; do not include any explanation.
+"""
+    prompt = PromptTemplate(
+        input_variables=["text"],
+        template=prompt_template,
+    )
+
+    # 3. Enable structured output
+    llm_structured = llm.with_structured_output(WorkflowOutput)
+
+    # 4. Build the chain
+    chain = prompt | llm_structured
+
+    async def _inner(text: str) -> WorkflowOutput:
+        """
+        Args:
+            text: the combined technical spec + compliance text to analyze.
+        Returns:
+            A WorkflowOutput instance parsed from the LLM’s JSON.
+        """
+        output: WorkflowOutput = await chain.ainvoke(text)
+        logger.info("Proposed workflow: %s", output.json())
+        return output
+
+    # 5. Register
     yield FunctionInfo.from_fn(
         _inner,
-        description="Generates a step-by-step workflow based on the input text.",
+        description="Generates a structured workflow (steps + graph) from input text.",
     )

@@ -91,7 +91,7 @@ if __name__ == "__main__":
         "https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html",
     ]
     CUDA_COLLECTION_NAME = "cuda_docs"
-    DEFAULT_URI = "http://localhost:19530"
+    DEFAULT_URI = "http://192.168.4.98:19530"
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--urls", default=CUDA_URLS, action="append", help="Urls to scrape for RAG context")

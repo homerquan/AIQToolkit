@@ -34,7 +34,7 @@ embedders:
 retrievers:
   retriever:
     _type: milvus_retriever
-    uri: http://localhost:19530
+    uri: http://192.168.4.98:19530
     collection_name: "wikipedia_docs"
     embedding_model: milvus_embedder
     top_k: 10
