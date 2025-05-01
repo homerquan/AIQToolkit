@@ -57,7 +57,7 @@ If you have not already done so, follow the instructions in the [Install Guide](
 From the root directory of the AgentIQ library, run the following commands:
 
 ```bash
-uv pip install -e examples/simple_calculator
+uv pip install -e sp8/sp8_workflow_generator
 ```
 
 ### Set Up API Keys
@@ -85,15 +85,15 @@ phoenix serve
 Return to your original terminal, and run the following command from the root of the AgentIQ repo to execute this workflow with the specified input:
 
 ```bash
-aiq run --config_file examples/simple_calculator/configs/config-tracing.yml --input "Is the product of 2 * 4 greater than the current hour of the day?"
+aiq run --config_file sp8/sp8_workflow_generator/configs/config-tracing.yml --input "Is the product of 2 * 4 greater than the current hour of the day?"
 ```
 
 **Expected Output**
 The workflow output can be quite lengthy, the end of the workflow output should contain something similar to the following (the final answer will depend on the time of day the workflow is run):
 ```console
-$ aiq run --config_file examples/simple_calculator/configs/config.yml --input "Is the product of 2 * 4 greater than the current hour of the day?"
+$ aiq run --config_file sp8/sp8_workflow_generator/configs/config.yml --input "Is the product of 2 * 4 greater than the current hour of the day?"
 2025-04-23 15:58:34,877 - aiq.runtime.loader - WARNING - Loading module 'aiq_automated_description_generation.register' from entry point 'aiq_automated_description_generation' took a long time (440.151215 ms). Ensure all imports are inside your registered functions.
-2025-04-23 15:58:35,193 - aiq.cli.commands.start - INFO - Starting AgentIQ from config file: 'examples/simple_calculator/configs/config.yml'
+2025-04-23 15:58:35,193 - aiq.cli.commands.start - INFO - Starting AgentIQ from config file: 'sp8/sp8_workflow_generator/configs/config.yml'
 2025-04-23 15:58:35,199 - aiq.cli.commands.start - WARNING - The front end type in the config file (fastapi) does not match the command name (console). Overwriting the config file front end.
 
 Configuration Summary:
@@ -190,14 +190,14 @@ Prior to building the Docker image ensure that you have followed the steps in th
 From the root directory of the Simple Calculator repository, build the Docker image:
 
 ```bash
-docker build --build-arg AIQ_VERSION=$(python -m setuptools_scm) -t simple_calculator -f examples/simple_calculator/Dockerfile .
+docker build --build-arg AIQ_VERSION=$(python -m setuptools_scm) -t sp8_workflow_generator -f sp8/sp8_workflow_generator/Dockerfile .
 ```
 
 ### Run the Docker Container
 Deploy the container:
 
 ```bash
-docker run -p 8000:8000 -p 6006:6006 -e NVIDIA_API_KEY simple_calculator
+docker run -p 8000:8000 -p 6006:6006 -e NVIDIA_API_KEY sp8_workflow_generator
 ```
 
 Note, a phoenix telemetry service will be exposed at port 6006.
@@ -225,7 +225,7 @@ curl -X 'POST' \
 
 ## Using MCP Services for running the workflow
 
-The `config-mcp-client.yml` file demonstrates how to use an MCP service as a tool in the AgentIQ `simple_calculator` workflow.
+The `config-mcp-client.yml` file demonstrates how to use an MCP service as a tool in the AgentIQ `sp8_workflow_generator` workflow.
 
 ### MCP Server Setup
 
@@ -233,10 +233,10 @@ Follow the instructions in the [MCP Server README](../mcp_server/README.md) to s
 
 ### Running the workflow with MCP service
 
-The `config-mcp-client.yml` file demonstrates how to use an MCP service as a tool in the AgentIQ `simple_calculator` workflow.
+The `config-mcp-client.yml` file demonstrates how to use an MCP service as a tool in the AgentIQ `sp8_workflow_generator` workflow.
 
 ```bash
-aiq run --config_file examples/simple_calculator/configs/config-mcp-client.yml --input "Is the product of 2 * 4 greater than the current hour of the day?"
+aiq run --config_file sp8/sp8_workflow_generator/configs/config-mcp-client.yml --input "Is the product of 2 * 4 greater than the current hour of the day?"
 ```
 
 **Expected Output**
