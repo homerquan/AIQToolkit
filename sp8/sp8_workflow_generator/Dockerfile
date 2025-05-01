@@ -38,17 +38,17 @@ RUN --mount=type=cache,id=uv_cache,target=/root/.cache/uv,sharing=locked \
     export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AGENTIQ=${AIQ_VERSION} && \
     export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AGENTIQ_LANGCHAIN=${AIQ_VERSION} && \
     export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AGENTIQ_TEST=${AIQ_VERSION} && \
-    export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AIQ_SIMPLE_CALCULATOR=${AIQ_VERSION} && \
+    export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SP8_WORKFLOW_GENERATOR=${AIQ_VERSION} && \
     uv venv --python ${PYTHON_VERSION} /workspace/.venv && \
     uv sync --link-mode=copy --compile-bytecode --python ${PYTHON_VERSION} && \
-    uv pip install --link-mode=copy ./examples/simple_calculator
+    uv pip install --link-mode=copy ./sp8/sp8_workflow_generator
 
 # Enivronment variables for the venv
 ENV PATH="/workspace/.venv/bin:$PATH"
 
 # Set the config file environment variable
-ENV AIQ_CONFIG_FILE=/workspace/examples/simple_calculator/configs/config.yml
+ENV AIQ_CONFIG_FILE=/workspace/sp8/sp8_workflow_generator/configs/config.yml
 
 # Define the entry point to start the server
-ENTRYPOINT ["/bin/bash", "-c", "aiq serve --config_file=/workspace/examples/simple_calculator/configs/config.yml \
+ENTRYPOINT ["/bin/bash", "-c", "aiq serve --config_file=/workspace/sp8/sp8_workflow_generator/configs/config.yml \
     --host 0.0.0.0 & phoenix serve"]
